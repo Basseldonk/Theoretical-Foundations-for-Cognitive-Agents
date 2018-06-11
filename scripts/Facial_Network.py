@@ -18,7 +18,7 @@ from sklearn.neural_network import MLPClassifier
 # In[3]:
 
 
-main_path = 'C:/Users/Rik/Documents/Radboud Universiteit/TFfCA/Data/CFD Version 2.0.3/'
+main_path = '../resources/cfd/CFD Version 2.0.3/'
 excel_path = main_path + 'CFD 2.0.3 Norming Data and Codebook.xlsx'
 pictures_path = main_path + 'CFD 2.0.3 Images/'
 cfd = pd.read_excel(excel_path, sheet_name = 0, header = 4, skipRows = 4)
@@ -117,49 +117,6 @@ def buildMLPtrainInput(pictureTuples):
         print('{} / {} complete.'.format(i+1,len(pictureTuples)), end='\r')
         sys.stdout.flush()
     return MLPinput, MLPlabels
-
-
-# In[31]:
-
-
-clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(1, 33), random_state=1, verbose = True)
-
-
-# In[32]:
-
-
-clf.fit(mlpInput[0], mlpInput[1])
-
-
-# In[115]:
-
-
-clf.predict(testInput)
-
-
-# In[12]:
-
-
-#Random initialization for testing purposes
-#This part creates a training set
-exampleTrainSet = cfd.head(20)
-etsNames = exampleTrainSet["Target"].tolist()
-exampleInput = createRandomTrainSet(etsNames)
-mlpInput = buildMLPtrainInput(exampleInput)
-
-
-# In[13]:
-
-
-#Random initialization for testing purposes
-#This part creates a small test set
-exampleTestSet = cfd.loc[5]
-# print(exampleTestSet["Target"])
-testInput = buildMLPtestInput([exampleTestSet["Target"]])
-
-
-# In[9]:
-
 
 #Should result in array of 12,596,376 values
 def imageToFloats(image):

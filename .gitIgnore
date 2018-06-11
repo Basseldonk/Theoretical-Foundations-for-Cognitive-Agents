@@ -1,2 +1,4 @@
 # Ignore the dataset
 resources/cfd/
+
+# scripts/__pycache__

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3.6
-
+from sklearn.model_selection import cross_val_score
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import KFold
+import Facial_Network as nn
 import numpy as np
+import random
 import cv2
 import os
 
@@ -10,10 +14,11 @@ class dataset_generator:
     """
 
     def __init__(self):
-        self.datasetM = []
-        self.datasetF = []
+        self.dataset = []
         self.datapath = "../resources/cfd/CFD Version 2.0.3/CFD 2.0.3 Images/"
-        self.separateData()
+        sex = input("To which gender are you sexually attracted? (M/F)")
+        print(sex)
+        self.rateData(sex)
 
     def accessPicture(self, target):
         """
@@ -43,19 +48,26 @@ class dataset_generator:
             elif key == 78 or key == 110:  # if 'N' or 'n' was pressed.
                 cv2.destroyAllWindows()
                 return False
-    
-    def separateData(self):
+
+    def rateData(self, sex):
         """ 
-        Splits data in datapath to male and female set.
+        Shows image of preferred sex in random order and stores preference rating. 
+        Arguments:
+        sex = (char) 'M' if you want to rate men, 'F' if you want to rate women. 
         """
         dirs = [f for f in os.listdir(self.datapath) if os.path.isdir(os.path.join(self.datapath, f))]
+        random.shuffle(dirs)
+        i = 0
         for dir in dirs:
-            if dir[1] is 'M':
-                self.datasetM.append((dir, self.showImage(self.accessPicture(dir))))
-            elif dir[1] is 'F':
-                self.datasetM.append((dir, self.showImage(self.accessPicture(dir))))
-
+            if dir[1] == sex.upper() and i < 50:
+                self.dataset.append((dir, self.showImage(self.accessPicture(dir))))
+                i += 1
 
 if __name__ == "__main__":
     dg = dataset_generator()
-    #dg.showImage("./resources/img.jpg")
+    print("Len of dataset = {}".format(len(dg.dataset)))
+    MLPinput, MLPlabels = nn.buildMLPtrainInput(dg.dataset)
+    clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(33), random_state=1, verbose = True)
+    scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
+    print("Accuracy: %0.1f (+/- %0.1f)" % (scores.mean(), scores.std() * 2))
+    
