@@ -98,8 +98,8 @@ if __name__ == "__main__":
     name = input("What is your name?")
 
     # Comment out the next part to skip the rating of faces and load an existing file.
-    # dg = dataset_generator()
-    # pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
+    dg = dataset_generator()
+    pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
 
     MLPinput, MLPlabels = nn.buildMLPtrainInput(pickle.load( open("../resources/saved data/saved_data_" + name + ".p", 'rb')))
     clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(33), random_state=1, verbose = True)
