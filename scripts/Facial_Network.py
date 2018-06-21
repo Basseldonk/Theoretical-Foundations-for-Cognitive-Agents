@@ -86,7 +86,7 @@ def buildMLPtestInput(pictureNames):
         subject = list(cfdOrdinal.loc[cfdOrdinal["Target"] == pictureNames[i]].values[0])
         del subject[0]
         MLPinput.append(subject)
-        print('{} / {} complete.'.format(i+1,len(pictureNames)), end='\r')
+        print('{} / {} complete.'.format(i+1,len(pictureNames)))
         sys.stdout.flush()
     return MLPinput
 
@@ -114,7 +114,7 @@ def buildMLPtrainInput(pictureTuples):
         del subject[0]
         MLPinput.append(subject)
         MLPlabels.append(current[1])
-        print('{} / {} complete.'.format(i+1,len(pictureTuples)), end='\r')
+        print('{} / {} complete.'.format(i+1,len(pictureTuples)))
         sys.stdout.flush()
     return MLPinput, MLPlabels
 
@@ -136,12 +136,12 @@ def imageToFloats(image):
 
 
 #Remove the 'Target' column prior to calling this function
-def checkMat():
-    for row in range (0, len(checkArray)):
-        for col in range (0, len(checkArray[0])):
-            if(type(checkArray[row][col]) is not np.float64):
-                return False
-    return True
+# def checkMat():
+#     for row in range (0, len(checkArray)):
+#         for col in range (0, len(checkArray[0])):
+#             if(type(checkArray[row][col]) is not np.float64):
+#                 return False
+#     return True
 # checkArray = cfdOrdinal.as_matrix()
 # checkMat()
 
