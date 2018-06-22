@@ -9,6 +9,7 @@ import random
 import pickle
 import cv2
 import os
+import time
 
 class dataset_generator:
     """
@@ -85,32 +86,47 @@ class recursive_feature_elimination:
         for i in range(0, len(attributes)):
             print("Removing ", attributes[i], " from list...")
             newMLPinput, leftOuts = self.removeFeature(MLPinput, i)
-            clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(33), random_state=1, verbose=True)
+            clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(32), random_state=1, verbose=True)
             scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
             mlpPerformances.append(scores.mean())
             self.restoreFeature(newMLPinput, leftOuts, i)
         return mlpPerformances
+
+    def labelPerformances(self, MLPlabels, performances):
+        lblPerfs = []
+        for i in range(0, len(MLPlabels)):
+            lblPerfs.append((MLPlabels[i], performances[i]))
+        return lblPerfs
+
+    def printPerformances(self, lblPerfs):
+        for i in range(0, len(lblPerfs)):
+            print("Network performance without %s: %0.5f" % (lblPerfs[i][0], lblPerfs[i][1]))
 
 
 
 
 if __name__ == "__main__":
     name = input("What is your name?")
+    script_start_time = time.time()
 
     # Comment out the next part to skip the rating of faces and load an existing file.
-    dg = dataset_generator()
-    pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
-
+    # dg = dataset_generator()
+    # pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
+    attLabels = nn.getColNames()
     MLPinput, MLPlabels = nn.buildMLPtrainInput(pickle.load( open("../resources/saved data/saved_data_" + name + ".p", 'rb')))
     clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(33), random_state=1, verbose = True)
     scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
     print("Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
 
     RFE = recursive_feature_elimination()
+    RFEPerformance = RFE.labelPerformances(attLabels, RFE.RFE(MLPinput, MLPlabels))
+    RFE.printPerformances(RFEPerformance)
 
-    RFEPerformance = RFE.RFE(MLPinput, MLPlabels)
-    print(RFEPerformance)
+    print('%0.2f min: Finished running networks' % ((time.time() - script_start_time) / 60))
+    #Runtime should be around 2 minutes
 
+
+    #################################################################
     #PERFORMANCES FOR GEMMA, VALUE INDECIES CORRESPOIND WITH THE ATTRIBUTE AT THE SAME INDEX, E.G. THE FIRST ELEMENT IS RACE
     #STORED HERE TEMPORARILY FOR TESTING/EVALUATION PURPOSES
     # [0.7107799671592775, 0.7181691297208539, 0.7110180623973726, 0.7257799671592775, 0.7180541871921182,

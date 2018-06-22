@@ -12,7 +12,6 @@ from os.path import isfile, join
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_selection import RFE
 
-
 main_path = '../resources/cfd/CFD Version 2.0.3/'
 excel_path = main_path + 'CFD 2.0.3 Norming Data and Codebook.xlsx'
 pictures_path = main_path + 'CFD 2.0.3 Images/'
@@ -41,13 +40,13 @@ def encodeGender(gender):
     else:
         return 0
 
-
 cfdOrdinal = cfd.copy(deep=True)
 cfdOrdinal['Race'] = cfdOrdinal['Race'].apply(lambda x: encodeRace(x))
-cfdOrdinal['Gender'] = cfdOrdinal['Gender'].apply(lambda y: encodeGender(y))
+#cfdOrdinal['Gender'] = cfdOrdinal['Gender'].apply(lambda y: encodeGender(y))
+cfdOrdinal = cfdOrdinal.drop('Gender', axis = 1)
 cfdOrdinal = cfdOrdinal.drop('Suitability', axis = 1)
 cfdOrdinal = cfdOrdinal.drop('NumberofRaters', axis = 1)
-cfdOrdinal.head()
+#cfdOrdinal.head()
 
 def getColNames():
     return list(cfdOrdinal.columns.values)[1:]
@@ -57,7 +56,6 @@ def accessPicture(target):
     allFilesInPath = [f for f in listdir(testPath) if isfile(join(testPath, f))]
     neutralPic = next((i_path for i_path in allFilesInPath if 'N' in i_path), (""))
     return Image.open(testPath + '/' + neutralPic)
-
 
 #Takes an array of picture names as input, returns an array of all pixel values
 def buildMLPtestInput(pictureNames):
@@ -69,7 +67,6 @@ def buildMLPtestInput(pictureNames):
         print('{} / {} complete.'.format(i+1,len(pictureNames)))
         sys.stdout.flush()
     return MLPinput
-
 
 def createRandomTrainSet(trainSet):
     networkIn = []
@@ -84,15 +81,13 @@ def buildMLPtrainInput(pictureTuples):
     for i in range(0, len(pictureTuples)):
         current = pictureTuples[i]
         subject = list(cfdOrdinal.loc[cfdOrdinal["Target"] == current[0]].values[0])
-        del subject[0]
+        # del subject[2] #remove the gender
+        del subject[0] #remove the target name
         MLPinput.append(subject)
         MLPlabels.append(current[1])
         print('{} / {} complete.'.format(i+1,len(pictureTuples)))
         sys.stdout.flush()
     return MLPinput, MLPlabels
-
-#Recursive Feature Elimination function
-# def RFE()
 
 #UNUSED FUNCTIONS##################################################################
 
