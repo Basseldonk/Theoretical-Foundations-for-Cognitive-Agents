@@ -1,5 +1,6 @@
-# Ignore the dataset
-resources/cfd/
-
-scripts/__pycache__/
+/resources/cfd/
+/scripts/__pycache/
 scripts/.ipynb_checkpoints
+/.idea
+/.vscode
+.pyc

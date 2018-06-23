@@ -91,7 +91,7 @@ class recursive_feature_elimination:
             newMLPinput, leftOuts = self.removeFeature(MLPinput, i)
             clf = MLPClassifier(solver='sgd', hidden_layer_sizes=(32), random_state=1, verbose=True, max_iter=1000, learning_rate="adaptive")
             scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
-            mlpPerformances.append(scores.mean())
+            mlpPerformances.append([scores.mean(), scores.std()])
             self.restoreFeature(newMLPinput, leftOuts, i)
         return mlpPerformances
 
@@ -101,7 +101,6 @@ class recursive_feature_elimination:
         lblPerfs = []
         for i in range(0, len(attributes)):
             lblPerfs.append((attributes[i], performances[i]))
-        lblPerfs.sort(key= lambda x: x[1])
         return lblPerfs
 
     def printPerformances(self, lblPerfs):
@@ -110,22 +109,41 @@ class recursive_feature_elimination:
 
 
 if __name__ == "__main__":
-    name = input("What is your name?")
-    script_start_time = time.time()
+    # name = input("What is your name?")
     # Comment out the next part to skip the rating of faces and load an existing file.
     # dg = dataset_generator()
     # pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
-    MLPinput, MLPlabels = nn.buildMLPtrainInput(pickle.load( open("../resources/saved data/saved_data_" + name + ".p", 'rb')))
-    clf = MLPClassifier(solver='sgd', hidden_layer_sizes=(33), random_state=1, verbose=True, max_iter=1000, learning_rate="adaptive")
-    general_scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
 
-    RFE = recursive_feature_elimination()
-    RFEPerformance = RFE.labelPerformances(MLPinput, MLPlabels)
-    print("Standard network preformance: \nAccuracy: %f (+/- %f)" % (general_scores.mean(), general_scores.std() * 2))
-    RFE.printPerformances(RFEPerformance)
+    # data_path = "../resources/saved data/"
+    # all_subjects = [f for f in os.listdir(data_path) if os.path.isfile(os.path.join(data_path, f))]
+    # results = {}
 
-    print('%0.2f min: Finished running networks' % ((time.time() - script_start_time) / 60))
-    #Runtime should be around 2 minutes
+    # for subject in all_subjects:
+    #     script_start_time = time.time()
+    #     MLPinput, MLPlabels = nn.buildMLPtrainInput(pickle.load(open(os.path.join(data_path, subject), 'rb')))
+        
+    #     # Train standard MLP on all attributes.
+    #     clf = MLPClassifier(solver='sgd', hidden_layer_sizes=(33), random_state=1, verbose=True, max_iter=1000, learning_rate="adaptive")
+    #     general_scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
+        
+    #     # Recursively train MLP on all but one attributes.
+    #     RFE = recursive_feature_elimination()
+    #     RFEPerformance = RFE.labelPerformances(MLPinput, MLPlabels)
+
+    #     # Save results
+    #     results[subject.replace(".p", "")] = ([("All attributes", [general_scores.mean(), general_scores.std()])] + RFEPerformance, (time.time() - script_start_time) / 60)
+
+    # # Save results.
+    # pickle.dump(results, open("../resources/saved data/results.p", 'wb'))
+    
+    # Print results per subject.
+    results = pickle.load(open("../resources/saved data/results.p", "rb"))
+    for subject in results.keys():
+        print("Subject: {}".format(subject.replace(".p", "")))
+        print("Network performance with %s: %f acc, %f std" % (results[subject][0][0][0], results[subject][0][0][1][0], results[subject][0][0][1][1]))
+        # for i in range(1, len(results[subject][0])):
+        #     print("Network performance with %s: %f acc, %f std" % (results[subject][0][i][0], results[subject][0][i][1][0], results[subject][0][i][1][1]))
+        print("Time needed to gather results for this subject: %0.2f min." % (results[subject][1]))
 
 
     #################################################################
