@@ -83,8 +83,8 @@ class recursive_feature_elimination:
             mlpInput[i].insert(n, leftOuts[i])
         return mlpInput
 
-    def RFE(self, MLPinput, MLPlabels):
-        attributes = nn.getColNames()
+    def RFE(self, MLPinput, MLPlabels, attributes):
+        attributes = attributes
         mlpPerformances = []
         for i in range(0, len(attributes)):
             print("Removing ", attributes[i], " from list...")
@@ -95,34 +95,33 @@ class recursive_feature_elimination:
             self.restoreFeature(newMLPinput, leftOuts, i)
         return mlpPerformances
 
-    def labelPerformances(self, MLPlabels, performances):
+    def labelPerformances(self, MLPinput, MLPlabels):
+        attributes = nn.getColNames()
+        performances = self.RFE(MLPinput, MLPlabels, attributes)
         lblPerfs = []
-        for i in range(0, len(MLPlabels)):
-            lblPerfs.append((MLPlabels[i], performances[i]))
+        for i in range(0, len(attributes)):
+            lblPerfs.append((attributes[i], performances[i]))
+        lblPerfs.sort(key= lambda x: x[1])
         return lblPerfs
 
     def printPerformances(self, lblPerfs):
         for i in range(0, len(lblPerfs)):
-            print("Network performance without %s: %0.5f" % (lblPerfs[i][0], lblPerfs[i][1]))
-
-
+            print("Network performance without %s: %f" % (lblPerfs[i][0], lblPerfs[i][1]))
 
 
 if __name__ == "__main__":
     name = input("What is your name?")
     script_start_time = time.time()
-
     # Comment out the next part to skip the rating of faces and load an existing file.
     # dg = dataset_generator()
     # pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
-    attLabels = nn.getColNames()
     MLPinput, MLPlabels = nn.buildMLPtrainInput(pickle.load( open("../resources/saved data/saved_data_" + name + ".p", 'rb')))
     clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(33), random_state=1, verbose = True)
     scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
-    print("Accuracy: %0.3f (+/- %0.3f)" % (scores.mean(), scores.std() * 2))
 
     RFE = recursive_feature_elimination()
-    RFEPerformance = RFE.labelPerformances(attLabels, RFE.RFE(MLPinput, MLPlabels))
+    RFEPerformance = RFE.labelPerformances(MLPinput, MLPlabels)
+    print("Standard network preformance: \nAccuracy: %f (+/- %f)" % (scores.mean(), scores.std() * 2))
     RFE.printPerformances(RFEPerformance)
 
     print('%0.2f min: Finished running networks' % ((time.time() - script_start_time) / 60))
