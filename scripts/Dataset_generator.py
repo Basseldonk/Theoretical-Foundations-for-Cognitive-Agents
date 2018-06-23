@@ -15,6 +15,9 @@ class dataset_generator:
     """
 
     def __init__(self, demo=False):
+        """
+        Starts the dataset generator. Use demo=True to only collect data of 50 samples to shorten runtime.
+        """
         self.dataset = []
         self.datapath = "../resources/cfd/CFD Version 2.0.3/CFD 2.0.3 Images/"
         sex = input("To which gender are you sexually attracted? (M/F)")
