@@ -89,7 +89,7 @@ class recursive_feature_elimination:
         for i in range(0, len(attributes)):
             print("Removing ", attributes[i], " from list...")
             newMLPinput, leftOuts = self.removeFeature(MLPinput, i)
-            clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(32), random_state=1, verbose=True)
+            clf = MLPClassifier(solver='sgd', hidden_layer_sizes=(32), random_state=1, verbose=True, max_iter=1000, learning_rate="adaptive")
             scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
             mlpPerformances.append(scores.mean())
             self.restoreFeature(newMLPinput, leftOuts, i)
@@ -116,12 +116,12 @@ if __name__ == "__main__":
     # dg = dataset_generator()
     # pickle.dump(dg.dataset, open("../resources/saved data/saved_data_" + name + ".p", 'wb'))
     MLPinput, MLPlabels = nn.buildMLPtrainInput(pickle.load( open("../resources/saved data/saved_data_" + name + ".p", 'rb')))
-    clf = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(33), random_state=1, verbose = True)
-    scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
+    clf = MLPClassifier(solver='sgd', hidden_layer_sizes=(33), random_state=1, verbose=True, max_iter=1000, learning_rate="adaptive")
+    general_scores = cross_val_score(clf, MLPinput, MLPlabels, cv=10)
 
     RFE = recursive_feature_elimination()
     RFEPerformance = RFE.labelPerformances(MLPinput, MLPlabels)
-    print("Standard network preformance: \nAccuracy: %f (+/- %f)" % (scores.mean(), scores.std() * 2))
+    print("Standard network preformance: \nAccuracy: %f (+/- %f)" % (general_scores.mean(), general_scores.std() * 2))
     RFE.printPerformances(RFEPerformance)
 
     print('%0.2f min: Finished running networks' % ((time.time() - script_start_time) / 60))
